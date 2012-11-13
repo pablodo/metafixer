@@ -40,7 +40,7 @@ def get_music(path):
 
     for value in data:
         artist = value['artist']
-        album = value['artist']
+        album = value['album']
         title = value['title']
         fpath = value['file']
         if artist not in doc:
@@ -48,9 +48,7 @@ def get_music(path):
         if album not in doc[artist]:
             doc[artist][album] = []
         if title not in doc[artist][album]:
-            doc[artist][album].append({title: fpath})
-
-    import pdb; pdb.set_trace()
+            doc[artist][album].append((title, fpath))
     return doc
 
 def _get_music_files(path, data=[]):

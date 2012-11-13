@@ -77,9 +77,13 @@ class MusicFilesTreeView(gtk.TreeView):
 
 
     def _load_treestore(self, data, parent=None):
-        if isinstance(data, list):
+        if isinstance(data, dict):
+            for key, value in data.iteritems():
+               new_parent = self.treestore.append(parent, [key])
+               self._load_treestore(value, new_parent)
+        elif isinstance(data, list):
             for value in data:
-               self._load_treestore(value, parent)
+                self.treestore.append(parent, [value[0]])
         else:
             self.treestore.append(parent, [data])
 

@@ -70,37 +70,41 @@ class MusicFilesTreeView(gtk.ScrolledWindow):
     def __init__(self):
         super(MusicFilesTreeView, self).__init__()
         self.path = '/home/qa/Music'
+        self.treeview = gtk.TreeView()
         self.load(self.path)
-        self.add(self.treeview)
 
     def load(self, path):
         self.files = []
         self.path = path
 
         self.data = explorer.get_music(self.path)
-        self.treestore = gtk.TreeStore(str)
+        self.store = gtk.TreeStore(str)
         self._load_treestore(self.data)
-        self.treeview = gtk.TreeView(self.treestore)
+        self.treeview.set_model(self.store)
         self.treeview.set_reorderable(True)
 
         self.tree_view_column = gtk.TreeViewColumn('Column')
-        self.treeview.append_column(self.tree_view_column)
+        if not len(self.treeview.get_columns()):
+            self.treeview.append_column(self.tree_view_column)
         self.cell_renderer = gtk.CellRendererText()
         self.tree_view_column.pack_start(self.cell_renderer, True)
         self.tree_view_column.add_attribute(self.cell_renderer, 'text', 0)
+        for child in self.get_children():
+            self.remove(child)
+        self.add(self.treeview)
 
 
     def _load_treestore(self, data, parent=None):
         if isinstance(data, dict):
             for key, value in data.iteritems():
-               new_parent = self.treestore.append(parent, [key])
-               self._load_treestore(value, new_parent)
+                new_parent = self.store.append(parent, [key])
+                self._load_treestore(value, new_parent)
         elif isinstance(data, list):
             for value in data:
-                i = self.treestore.append(parent, [value[0]])
+                i = self.store.append(parent, [value[0]])
                 self.files.append((i, value[1]))
         else:
-            self.treestore.append(parent, [data])
+            self.store.append(parent, [data])
 
 
 class AutocompleteEntry(gtk.Entry):
@@ -111,11 +115,34 @@ class AutocompleteEntry(gtk.Entry):
         self.path = os.getcwd()
         self.set_text(self.path)
         self.enter_callback = enter_callback
+        self.path_list = []
+        self.path_ant = None
         
-
     def key_press(self, widget, key):
         if key.keyval in (65289, 65056):
+            if not len(self.path_list) or self.path_ant is not self.path:
+                self.path_ant = self.path
+                self.dirpath, looking_file = self.path.rsplit('/', 1)
+                self.number = 0
+                self.path_list = os.listdir(self.dirpath)
+
+            if self.number >= len(self.path_list) and key.keyval == 65289:
+                self.number = 0
+            if self.number == 0 and key.keyval == 65056:
+                self.number = len(self.path_list) - 1
+
+            new_path = self.dirpath + '/' + self.path_list[self.number]
+            self.set_text(new_path) 
+
+            if key.keyval == 65289:
+                self.number += 1
+            else:
+                self.number -= 1
             return True
+        else:
+            self.path_list = []
+            self.path = os.path.abspath(self.get_text())
+            
         if key.keyval == 65293:
             self.enter_callback(self.get_text())
         return False

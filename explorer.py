@@ -3,6 +3,7 @@ import os
 
 from mutagen import File
 
+'''
 def get_files(path):
     path = os.path.abspath(path)
     if os.path.isdir(path):
@@ -32,6 +33,7 @@ def get_files(path):
         except:
             return None
         return fname
+'''
 
 def get_music(path):
     doc = {}
@@ -75,7 +77,8 @@ def _get_music_files(path, data):
         except:
             pass
 
-
+'''
 if __name__ == '__main__':
     tree = get_files('/home/qa/Music')
     print tree
+'''

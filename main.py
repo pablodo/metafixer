@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-
 import pygtk
 pygtk.require('2.0')
 import gtk
 
 import explorer
+import autocomplete
 
 class MetaFixer(gtk.Window):
 
@@ -41,7 +40,7 @@ class MetaFixer(gtk.Window):
         self.buttons_box = box
 
         # Path text
-        path_text = AutocompleteEntry(tree.load)
+        path_text = autocomplete.AutocompleteEntry(tree.load)
         
         # Main box
         box2 = gtk.VBox(spacing=5)
@@ -105,47 +104,6 @@ class MusicFilesTreeView(gtk.ScrolledWindow):
                 self.files.append((i, value[1]))
         else:
             self.store.append(parent, [data])
-
-
-class AutocompleteEntry(gtk.Entry):
-
-    def __init__(self, enter_callback):
-        super(AutocompleteEntry, self).__init__()
-        self.connect('key_press_event', self.key_press)
-        self.path = os.getcwd()
-        self.set_text(self.path)
-        self.enter_callback = enter_callback
-        self.path_list = []
-        self.path_ant = None
-        
-    def key_press(self, widget, key):
-        if key.keyval in (65289, 65056):
-            if not len(self.path_list) or self.path_ant is not self.path:
-                self.path_ant = self.path
-                self.dirpath, looking_file = self.path.rsplit('/', 1)
-                self.number = 0
-                self.path_list = os.listdir(self.dirpath)
-
-            if self.number >= len(self.path_list) and key.keyval == 65289:
-                self.number = 0
-            if self.number == 0 and key.keyval == 65056:
-                self.number = len(self.path_list) - 1
-
-            new_path = self.dirpath + '/' + self.path_list[self.number]
-            self.set_text(new_path) 
-
-            if key.keyval == 65289:
-                self.number += 1
-            else:
-                self.number -= 1
-            return True
-        else:
-            self.path_list = []
-            self.path = os.path.abspath(self.get_text())
-            
-        if key.keyval == 65293:
-            self.enter_callback(self.get_text())
-        return False
 
 
 if __name__ == '__main__':

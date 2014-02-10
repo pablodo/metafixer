@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
 import pygtk
 pygtk.require('2.0')
 import gtk
 
-import explorer
 import autocomplete
 
 class MetaFixer(gtk.Window):
@@ -70,12 +71,10 @@ class MusicFilesTreeView(gtk.ScrolledWindow):
         super(MusicFilesTreeView, self).__init__()
         self.path = '/home/qa/Music'
         self.treeview = gtk.TreeView()
-        self.load(self.path)
 
     def load(self, path):
-        self.files = []
-        self.path = path
 
+    
         self.data = explorer.get_music(self.path)
         self.store = gtk.TreeStore(str)
         self._load_treestore(self.data)
